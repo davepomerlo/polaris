@@ -1,13 +1,19 @@
 name: build
 
 # Every push builds and tests Windows, macOS and Linux and uploads a zip as a build artifact.
-# Pushing a version tag (e.g. v0.1.0) also publishes a GitHub Release with the zips attached.
+# To publish a GitHub Release: Actions tab > build > Run workflow > enter a version like v0.1.0.
+# Pushing a version tag (e.g. v0.1.0) does the same.
 on:
   push:
     branches: [main]
     tags: ['v*']
   pull_request:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish as a release, e.g. v0.1.0 (leave empty for a test build)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -41,8 +47,12 @@ jobs:
 
       - name: Package
         shell: bash
+        env:
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
         run: |
-          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then VERSION="$GITHUB_REF_NAME"; else VERSION="dev-${GITHUB_SHA::7}"; fi
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then VERSION="$GITHUB_REF_NAME"
+          elif [[ -n "$RELEASE_VERSION" ]]; then VERSION="$RELEASE_VERSION"
+          else VERSION="dev-${GITHUB_SHA::7}"; fi
           ART=build/Polaris_artefacts/Release
           mkdir -p dist/pkg
           cp -R "$ART/VST3/Polaris.vst3" dist/pkg/
@@ -75,7 +85,7 @@ jobs:
 
   release:
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.version != '')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -88,8 +98,11 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/* \
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then TAG="$GITHUB_REF_NAME"; else TAG="$RELEASE_VERSION"; fi
+          gh release create "$TAG" dist/* \
             --repo "$GITHUB_REPOSITORY" \
-            --title "Polaris $GITHUB_REF_NAME" \
+            --target "$GITHUB_SHA" \
+            --title "Polaris $TAG" \
             --notes-file packaging/RELEASE_NOTES.md

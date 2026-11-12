@@ -119,12 +119,10 @@ ctest --test-dir build-core --output-on-failure
 
 ## Making a release
 
-Push a version tag and GitHub Actions builds Windows, macOS and Linux and publishes a release with the downloads:
+On GitHub, open **Actions → build → Run workflow**, type a version such as `v0.2.0`, and press **Run workflow**.
+GitHub builds Windows, macOS and Linux and publishes a release with the downloads (about 5 minutes).
 
-```bash
-git tag v0.2.0
-git push origin v0.2.0
-```
+Pushing a tag does the same: `git tag v0.2.0 && git push origin v0.2.0`.
 
 ## Licence notes
 
