@@ -1,19 +1,34 @@
 name: build
 
+# Every push builds and tests Windows, macOS and Linux and uploads a zip as a build artifact.
+# Pushing a version tag (e.g. v0.1.0) also publishes a GitHub Release with the zips attached.
 on:
   push:
+    branches: [main]
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libjack-jackd2-dev ladspa-sdk libfreetype-dev libfontconfig1-dev \
+            libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev \
+            libglu1-mesa-dev mesa-common-dev
 
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
@@ -24,8 +39,57 @@ jobs:
       - name: Core tests
         run: ctest --test-dir build -C Release --output-on-failure
 
-      - name: Upload VST3
+      - name: Package
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then VERSION="$GITHUB_REF_NAME"; else VERSION="dev-${GITHUB_SHA::7}"; fi
+          ART=build/Polaris_artefacts/Release
+          mkdir -p dist/pkg
+          cp -R "$ART/VST3/Polaris.vst3" dist/pkg/
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            NAME="Polaris-$VERSION-Windows"
+            cp "$ART/Standalone/Polaris.exe" dist/pkg/
+            cp packaging/INSTALL-Windows.txt dist/pkg/INSTALL.txt
+            (cd dist/pkg && cmake -E tar cf "../$NAME.zip" --format=zip .)
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            NAME="Polaris-$VERSION-macOS"
+            cp -R "$ART/AU/Polaris.component" dist/pkg/
+            cp -R "$ART/Standalone/Polaris.app" dist/pkg/
+            cp packaging/INSTALL-macOS.txt dist/pkg/INSTALL.txt
+            (cd dist/pkg && cmake -E tar cf "../$NAME.zip" --format=zip .)
+          else
+            NAME="Polaris-$VERSION-Linux-x64"
+            cp "$ART/Standalone/Polaris" dist/pkg/
+            cp packaging/INSTALL-Linux.txt dist/pkg/INSTALL.txt
+            (cd dist/pkg && tar czf "../$NAME.tar.gz" .)   # tar keeps the executable bit
+          fi
+          echo "ZIP_NAME=$NAME" >> "$GITHUB_ENV"
+
+      - name: Upload zip
         uses: actions/upload-artifact@v4
         with:
-          name: Polaris-VST3-${{ matrix.os }}
-          path: build/Polaris_artefacts/Release/VST3/
+          name: ${{ env.ZIP_NAME }}
+          path: |
+            dist/*.zip
+            dist/*.tar.gz
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Polaris $GITHUB_REF_NAME" \
+            --notes-file packaging/RELEASE_NOTES.md

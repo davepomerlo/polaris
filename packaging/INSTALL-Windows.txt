@@ -1,0 +1,24 @@
+POLARIS - AI mix & master assistant (early test build)
+
+INSTALL (FL Studio and other Windows DAWs)
+1. Copy the "Polaris.vst3" folder to:
+       C:\Program Files\Common Files\VST3\
+   (Windows asks for admin permission - that's normal.)
+2. FL Studio: Options > Manage plugins > Find more plugins.
+   Other DAWs: rescan your VST3 plugins.
+3. Load Polaris on the Master mixer track, in the last slot.
+
+QUICK TEST WITHOUT A DAW
+Double-click Polaris.exe (standalone app). Pick your audio device in Options.
+
+FIRST STEPS
+- Choose a Target (Streaming -14, Loud -9, Club -7 LUFS) and a Style.
+- Play the loudest 20-30 seconds of your song and press Listen.
+- Apply the suggestions that sound right. Ride Drive for more glue and loudness.
+- Use Compare to hear the original mix at the same loudness.
+- A/B/C/D store different settings; Undo/Redo cover every change.
+
+This is an early, unsigned test build. If Windows SmartScreen warns about
+Polaris.exe, click "More info" > "Run anyway".
+
+Source code and updates: https://github.com/davepomerlo/polaris

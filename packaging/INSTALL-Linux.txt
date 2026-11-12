@@ -1,0 +1,22 @@
+POLARIS - AI mix & master assistant (early test build, Linux x64)
+
+INSTALL (Reaper, Bitwig, Ardour and other VST3 hosts)
+1. Copy the "Polaris.vst3" folder to   ~/.vst3/
+       mkdir -p ~/.vst3 && cp -r Polaris.vst3 ~/.vst3/
+2. Rescan VST3 plugins in your DAW.
+3. Load Polaris last on the master bus.
+
+QUICK TEST WITHOUT A DAW
+Run the standalone app:   ./Polaris
+(It uses ALSA or JACK; pick your device in Options.)
+
+Built on Ubuntu 24.04. Needs common desktop libraries (ALSA, FreeType, fontconfig, X11),
+which most desktop distributions already have.
+
+FIRST STEPS
+- Choose a Target (Streaming -14, Loud -9, Club -7 LUFS) and a Style.
+- Play the loudest 20-30 seconds of your song and press Listen.
+- Apply the suggestions that sound right. Ride Drive for more glue and loudness.
+- Use Compare to hear the original mix at the same loudness.
+
+Source code and updates: https://github.com/davepomerlo/polaris

@@ -6,6 +6,22 @@ and builds a starting chain you can drive with one knob or edit in full.
 Inspired by the *ideas* behind one-knob mix-bus chains, Ozone's Master Assistant and FabFilter's
 workflow. No code, presets, names or look are copied from any of them.
 
+## Download
+
+Get the latest build from **[Releases](https://github.com/davepomerlo/polaris/releases/latest)**:
+
+| System | File | Contains |
+| --- | --- | --- |
+| Windows (FL Studio, Ableton, Cubase, Reaper...) | `Polaris-…-Windows.zip` | VST3 plugin + standalone app |
+| macOS | `Polaris-…-macOS.zip` | VST3 + Audio Unit + standalone app |
+| Linux x64 (Reaper, Bitwig, Ardour...) | `Polaris-…-Linux-x64.tar.gz` | VST3 plugin + standalone app |
+
+Each download has an `INSTALL.txt`. On Windows: copy `Polaris.vst3` to `C:\Program Files\Common Files\VST3\`,
+rescan plugins in your DAW, and load Polaris last on the Master track.
+
+Builds are early and unsigned: Windows SmartScreen may warn about the standalone app, and macOS needs one
+Terminal command (in `INSTALL.txt`) before it will load the plugin.
+
 ## What's in this version (Phase 0 + first pass of Phase 1)
 
 | Part | Status |
@@ -23,7 +39,7 @@ workflow. No code, presets, names or look are copied from any of them.
 | Snapshots A/B/C/D (saved with your project; Shift-click copies the current sound into a slot) | Working |
 | Dynamic EQ bands, linear phase, dither, ML models | Not yet (see the build plan in the spec) |
 
-## Build on Windows 11 (for FL Studio)
+## Build it yourself on Windows 11 (optional)
 
 You need:
 
@@ -99,6 +115,15 @@ thread fed by lock-free FIFOs.
 cmake -B build-core -DPOLARIS_CORE_ONLY=ON
 cmake --build build-core
 ctest --test-dir build-core --output-on-failure
+```
+
+## Making a release
+
+Push a version tag and GitHub Actions builds Windows, macOS and Linux and publishes a release with the downloads:
+
+```bash
+git tag v0.2.0
+git push origin v0.2.0
 ```
 
 ## Licence notes

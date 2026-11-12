@@ -1,0 +1,21 @@
+POLARIS - AI mix & master assistant (early test build)
+
+INSTALL
+1. Copy "Polaris.vst3" to   ~/Library/Audio/Plug-Ins/VST3/
+   Copy "Polaris.component" (Audio Unit, for Logic/GarageBand) to   ~/Library/Audio/Plug-Ins/Components/
+2. This build is not notarized by Apple yet, so macOS will block it at first.
+   Open Terminal and run:
+       xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/Polaris.vst3
+       xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/Components/Polaris.component
+3. Rescan plugins in your DAW and load Polaris last on the master/stereo out.
+
+QUICK TEST WITHOUT A DAW
+Open Polaris.app (right-click > Open the first time).
+
+FIRST STEPS
+- Choose a Target (Streaming -14, Loud -9, Club -7 LUFS) and a Style.
+- Play the loudest 20-30 seconds of your song and press Listen.
+- Apply the suggestions that sound right. Ride Drive for more glue and loudness.
+- Use Compare to hear the original mix at the same loudness.
+
+Source code and updates: https://github.com/davepomerlo/polaris
